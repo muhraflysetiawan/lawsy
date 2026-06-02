@@ -4,16 +4,24 @@ import { Theme } from '../theme';
 import { CustomInput } from '../components/CustomInput';
 import { CustomButton } from '../components/CustomButton';
 import { HeaderSection } from '../components/HeaderSection';
+import { API_URL } from '../config';
 
 const { height } = Dimensions.get('window');
 
-export const SetNewPasswordScreen = ({ navigation }) => {
+export const SetNewPasswordScreen = ({ navigation, route }) => {
+  const email = route?.params?.email || '';
+  const [otp, setOtp] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const handleResetPassword = () => {
+  const handleResetPassword = async () => {
     setError('');
+    if (!otp) {
+      setError('Please enter the 6-digit OTP code sent to your email');
+      return;
+    }
     if (!password || !confirmPassword) {
       setError('Please fill in both password fields');
       return;
@@ -23,9 +31,31 @@ export const SetNewPasswordScreen = ({ navigation }) => {
       return;
     }
     
-    Alert.alert('Success', 'Password has been reset!', [
-      { text: 'OK', onPress: () => navigation.navigate('Login') }
-    ]);
+    setLoading(true);
+    try {
+      const response = await fetch(`${API_URL}?action=reset_password`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email,
+          otp,
+          new_password: password
+        })
+      });
+      const result = await response.json();
+      if (result.status === 'success') {
+        Alert.alert('Success', 'Password has been reset successfully!', [
+          { text: 'OK', onPress: () => navigation.navigate('Login') }
+        ]);
+      } else {
+        setError(result.message || 'Failed to reset password. Please check your OTP.');
+      }
+    } catch (e) {
+      console.error(e);
+      setError('Connection error. Please check your network.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -49,6 +79,13 @@ export const SetNewPasswordScreen = ({ navigation }) => {
 
             {/* Inputs with Labels */}
             <CustomInput
+              label="OTP Code"
+              placeholder="Enter 6-digit OTP code"
+              keyboardType="number-pad"
+              value={otp}
+              onChangeText={setOtp}
+            />
+            <CustomInput
               label="New Password"
               placeholder="Enter new password"
               secureTextEntry
@@ -65,9 +102,10 @@ export const SetNewPasswordScreen = ({ navigation }) => {
 
             {/* Reset Password Button */}
             <CustomButton
-              title="Reset Password"
+              title={loading ? "Resetting Password..." : "Reset Password"}
               onPress={handleResetPassword}
               style={{ marginTop: Theme.spacing.near }}
+              disabled={loading}
             />
           </ScrollView>
         </View>

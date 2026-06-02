@@ -15,6 +15,8 @@ export const RegisterScreen = ({ navigation }) => {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [isOtpSent, setIsOtpSent] = useState(false);
+  const [otp, setOtp] = useState('');
 
   const handleSignUp = async () => {
     setError('');
@@ -23,30 +25,55 @@ export const RegisterScreen = ({ navigation }) => {
       return;
     }
 
-    setLoading(true);
-    try {
-      const response = await fetch(`${API_URL}?action=register`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ name, email, password }),
-      });
-
-      const result = await response.json();
-
-      if (result.status === 'success') {
-        Alert.alert('Success', 'Account created successfully!', [
-          { text: 'OK', onPress: () => navigation.navigate('Login') }
-        ]);
-      } else {
-        setError(result.message || 'Failed to create account');
+    if (!isOtpSent) {
+      // Step 1: Send registration OTP
+      setLoading(true);
+      try {
+        const response = await fetch(`${API_URL}?action=send_register_otp`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email }),
+        });
+        const result = await response.json();
+        if (result.status === 'success') {
+          setIsOtpSent(true);
+          Alert.alert('Success', 'Verification OTP code has been sent successfully to your email!');
+        } else {
+          setError(result.message || 'Failed to send OTP. Please verify your email.');
+        }
+      } catch (error) {
+        console.error(error);
+        setError('Connection error. Please check your network.');
+      } finally {
+        setLoading(false);
       }
-    } catch (error) {
-      console.error(error);
-      setError('Connection error. Please check your network.');
-    } finally {
-      setLoading(false);
+    } else {
+      // Step 2: Verify OTP and Register Account
+      if (!otp) {
+        setError('Please enter the 6-digit verification OTP');
+        return;
+      }
+      setLoading(true);
+      try {
+        const response = await fetch(`${API_URL}?action=register`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, email, password, otp }),
+        });
+        const result = await response.json();
+        if (result.status === 'success') {
+          Alert.alert('Success', 'Account created successfully!', [
+            { text: 'OK', onPress: () => navigation.navigate('Login') }
+          ]);
+        } else {
+          setError(result.message || 'Verification failed. Please check your OTP.');
+        }
+      } catch (error) {
+        console.error(error);
+        setError('Connection error. Please check your network.');
+      } finally {
+        setLoading(false);
+      }
     }
   };
 
@@ -93,6 +120,7 @@ export const RegisterScreen = ({ navigation }) => {
               placeholder="Enter your full name"
               value={name}
               onChangeText={setName}
+              editable={!isOtpSent}
             />
             <CustomInput
               label="Email"
@@ -100,6 +128,7 @@ export const RegisterScreen = ({ navigation }) => {
               keyboardType="email-address"
               value={email}
               onChangeText={setEmail}
+              editable={!isOtpSent}
             />
             <CustomInput
               label="Password"
@@ -107,11 +136,33 @@ export const RegisterScreen = ({ navigation }) => {
               secureTextEntry
               value={password}
               onChangeText={setPassword}
+              editable={!isOtpSent}
             />
+
+            {isOtpSent && (
+              <>
+                <Text style={{
+                  fontFamily: Theme.fonts.medium,
+                  fontSize: 14,
+                  color: Theme.colors.text,
+                  marginVertical: 10,
+                  textAlign: 'center'
+                }}>
+                  We have sent a 6-digit OTP code to your email. Please enter it below to complete your registration.
+                </Text>
+                <CustomInput
+                  label="Verification OTP"
+                  placeholder="Enter 6-digit verification code"
+                  keyboardType="number-pad"
+                  value={otp}
+                  onChangeText={setOtp}
+                />
+              </>
+            )}
 
             {/* Sign Up Button */}
             <CustomButton
-              title={loading ? "Creating Account..." : "Sign Up"}
+              title={loading ? (isOtpSent ? "Verifying..." : "Sending OTP...") : (isOtpSent ? "Verify & Sign Up" : "Sign Up")}
               onPress={handleSignUp}
               style={{ marginTop: Theme.spacing.near }}
               disabled={loading}

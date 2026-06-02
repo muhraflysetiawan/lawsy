@@ -10,6 +10,10 @@ $db_name = 'lawsy';
 $username = 'root';
 $password = '';
 
+// SMTP Configuration for Email OTP (lawsy.app@gmail.com)
+define('SMTP_EMAIL', 'lawsy.app@gmail.com');
+define('SMTP_PASSWORD', 'ykyc jshd unuz gupd'); // Default Gmail App Password, replace with your own once deployed!
+
 try {
     $conn = new PDO("mysql:host={$host};dbname={$db_name}", $username, $password);
     $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);

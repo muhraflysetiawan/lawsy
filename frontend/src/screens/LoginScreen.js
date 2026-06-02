@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ImageBackground, TouchableOpacity, ScrollView, Platform, Alert, Dimensions } from 'react-native';
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -17,6 +17,21 @@ export const LoginScreen = ({ navigation }) => {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [rememberMe, setRememberMe] = useState(false);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const rememberedEmail = await AsyncStorage.getItem('remembered_email');
+        if (rememberedEmail) {
+          setEmail(rememberedEmail);
+          setRememberMe(true);
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    })();
+  }, []);
 
   const handleSignIn = async () => {
     setError('');
@@ -40,6 +55,13 @@ export const LoginScreen = ({ navigation }) => {
       if (result.status === 'success') {
         const userWithPwd = { ...result.user, plainPassword: password };
         await AsyncStorage.setItem('user', JSON.stringify(userWithPwd));
+        
+        if (rememberMe) {
+          await AsyncStorage.setItem('remembered_email', email);
+        } else {
+          await AsyncStorage.removeItem('remembered_email');
+        }
+        
         Alert.alert('Success', `Welcome back, ${result.user.name}!`);
         
         if (result.user.role === 'Superadmin') {
@@ -116,10 +138,24 @@ export const LoginScreen = ({ navigation }) => {
               onChangeText={setPassword}
             />
 
-            {/* Forgot Password Link */}
-            <TouchableOpacity onPress={() => navigation.navigate('ForgotPassword')}>
-              <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
-            </TouchableOpacity>
+            {/* Remember Me & Forgot Password Row */}
+            <View style={styles.rememberForgotRow}>
+              <TouchableOpacity 
+                style={styles.rememberMeContainer} 
+                onPress={() => setRememberMe(!rememberMe)}
+              >
+                <Ionicons 
+                  name={rememberMe ? "checkbox" : "square-outline"} 
+                  size={20} 
+                  color={Theme.colors.primary} 
+                />
+                <Text style={styles.rememberMeText}>Remember me</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity onPress={() => navigation.navigate('ForgotPassword')}>
+                <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
+              </TouchableOpacity>
+            </View>
 
             {/* Sign In Button */}
             <CustomButton
@@ -214,6 +250,22 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: Theme.colors.primary,
     textAlign: 'right',
+  },
+  rememberForgotRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginVertical: Theme.spacing.near,
+  },
+  rememberMeContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  rememberMeText: {
+    fontFamily: Theme.fonts.medium,
+    fontSize: 14,
+    color: Theme.colors.text,
+    marginLeft: 8,
   },
   registerContainer: {
     flexDirection: 'row',

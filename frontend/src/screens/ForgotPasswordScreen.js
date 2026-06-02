@@ -1,25 +1,45 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ImageBackground, TouchableOpacity, ScrollView, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, ImageBackground, TouchableOpacity, ScrollView, Dimensions, Alert, ActivityIndicator } from 'react-native';
 import { Theme } from '../theme';
 import { CustomInput } from '../components/CustomInput';
 import { CustomButton } from '../components/CustomButton';
 import { Ionicons } from '@expo/vector-icons';
 import { HeaderSection } from '../components/HeaderSection';
+import { API_URL } from '../config';
 
 const { height } = Dimensions.get('window');
 
 export const ForgotPasswordScreen = ({ navigation }) => {
   const [email, setEmail] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const handleSendCode = () => {
+  const handleSendCode = async () => {
     if (!email) {
       setError('Please enter your registered email address');
       return;
     }
     setError('');
-    // Handle OTP sending logic
-    navigation.navigate('SetNewPassword');
+    setLoading(true);
+    try {
+      const response = await fetch(`${API_URL}?action=forgot_password`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email })
+      });
+      const result = await response.json();
+      if (result.status === 'success') {
+        Alert.alert('Success', 'OTP code has been sent successfully to your email!');
+        navigation.navigate('SetNewPassword', { email });
+      } else {
+        setError(result.message || 'Failed to send OTP code');
+      }
+    } catch (e) {
+      console.error(e);
+      setError('Connection error. Please check your network.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -57,9 +77,10 @@ export const ForgotPasswordScreen = ({ navigation }) => {
 
             {/* Send Code Button */}
             <CustomButton
-              title="Send Code"
+              title={loading ? "Sending Code..." : "Send Code"}
               onPress={handleSendCode}
               style={{ marginTop: Theme.spacing.near }}
+              disabled={loading}
             />
 
             <TouchableOpacity onPress={() => navigation.goBack()} style={{ marginTop: 10 }}>

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import * as Location from 'expo-location';
 import {
   View,
   Text,
@@ -62,7 +63,17 @@ export const FindLawyerScreen = ({ navigation, route }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
 
+  const [locationPermission, setLocationPermission] = useState(false);
+
   useEffect(() => {
+    (async () => {
+      try {
+        const { status } = await Location.requestForegroundPermissionsAsync();
+        setLocationPermission(status === 'granted');
+      } catch (e) {
+        console.warn("Failed to request location permission:", e);
+      }
+    })();
     fetchRealLawyers();
   }, []);
 
@@ -159,7 +170,7 @@ export const FindLawyerScreen = ({ navigation, route }) => {
           <MapView 
             style={styles.map} 
             initialRegion={initialRegion}
-            showsUserLocation={true}
+            showsUserLocation={locationPermission}
             customMapStyle={customMapStyle}
           >
             {lawFirms.map((firm) => (
