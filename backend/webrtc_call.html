@@ -1,0 +1,930 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Lawsy Voice Call Connection</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #0b0f19;
+            color: #ffffff;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            box-sizing: border-box;
+            overflow: hidden;
+        }
+        .status-container {
+            display: none;
+            text-align: center;
+            z-index: 10;
+        }
+        .status-text {
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+            color: #4caf50;
+        }
+        .info-text {
+            font-size: 0.9rem;
+            color: #8892b0;
+        }
+        audio {
+            display: none;
+        }
+        #videoContainer {
+            display: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #0b0f19;
+            z-index: 100;
+        }
+        #remoteVideo {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 1;
+        }
+        .connecting #remoteVideo {
+            opacity: 0;
+        }
+        #localVideo {
+            position: absolute;
+            bottom: 30px;
+            right: 20px;
+            width: 100px;
+            height: 140px;
+            border-radius: 12px;
+            border: 2px solid rgba(255, 255, 255, 0.45);
+            object-fit: cover;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            z-index: 101;
+            background-color: #1e293b;
+            transform: scaleX(-1);
+        }
+        .connecting #localVideo {
+            position: absolute;
+            bottom: 0px;
+            right: 0px;
+            width: 100%;
+            height: 100%;
+            border-radius: 0px;
+            border: none;
+            z-index: 101;
+            transform: scaleX(-1);
+        }
+        .camera-loading {
+            display: none;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            z-index: 99;
+        }
+        .connecting .camera-loading {
+            display: block;
+        }
+        .spinner {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            border-top-color: #4caf50;
+            animation: spin 1s ease-in-out infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="status-container">
+        <div id="status" class="status-text">Initializing voice call...</div>
+        <div id="info" class="info-text">Please allow microphone access.</div>
+    </div>
+
+    <!-- Hidden audio element for remote stream fallback -->
+    <audio id="remoteAudio" autoplay playsinline></audio>
+
+    <!-- Video Calling Container -->
+    <div id="videoContainer" class="connecting">
+        <div class="camera-loading">
+            <div class="spinner"></div>
+            <div style="margin-top: 15px; font-size: 0.9rem; color: #8892b0; font-family: Arial, sans-serif;">Starting camera...</div>
+        </div>
+        <video id="remoteVideo" autoplay playsinline></video>
+        <video id="localVideo" autoplay playsinline muted></video>
+    </div>
+
+    <script>
+        // Logger helper to send logs to React Native
+        function log(message) {
+            console.log("[WebRTC Page]:", message);
+            const statusEl = document.getElementById('status');
+            if (statusEl) {
+                // If it's a short connection message, show it
+                if (typeof message === 'string' && message.length < 50 && !message.includes('candidate')) {
+                    statusEl.innerText = message;
+                }
+            }
+            // Send message to React Native WebView or parent iframe
+            const logMsg = JSON.stringify({
+                type: 'log',
+                message: message
+            });
+            if (window.ReactNativeWebView) {
+                window.ReactNativeWebView.postMessage(logMsg);
+            } else {
+                window.parent.postMessage(logMsg, '*');
+            }
+        }
+
+        function notifyRN(type, data = {}) {
+            const msgStr = JSON.stringify({
+                type: type,
+                ...data
+            });
+            if (window.ReactNativeWebView) {
+                window.ReactNativeWebView.postMessage(msgStr);
+            } else {
+                window.parent.postMessage(msgStr, '*');
+            }
+        }
+
+        // Parse URL Parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const role = urlParams.get('role'); // 'caller' or 'receiver'
+        const bookingId = urlParams.get('booking_id');
+        const userId = urlParams.get('user_id');
+        const targetId = urlParams.get('target_id');
+        const callApiUrl = urlParams.get('call_api_url') || './call_handler.php';
+        
+        let callIdVal = urlParams.get('call_id');
+        let callId = (callIdVal && !isNaN(callIdVal) && callIdVal.trim() !== '') ? parseInt(callIdVal) : null;
+
+        log(`Parameters: Role=${role}, Booking=${bookingId}, User=${userId}, Target=${targetId}, CallID=${callId}`);
+
+        const isVideoCall = urlParams.get('video') === 'true';
+        
+        // Show video container immediately for video calls to avoid pitch-black loading screens
+        if (isVideoCall) {
+            const vCont = document.getElementById('videoContainer');
+            if (vCont) {
+                vCont.style.display = 'block';
+            }
+        }
+
+        let localStream = null;
+        let remoteStream = null;
+        let pc = null;
+        let audioContext = null;
+        let gainNode = null;
+        let sourceNode = null;
+        let isMuted = false;
+        let isSpeakerOn = false;
+        
+        let processedCandidates = new Set();
+        let signalingInterval = null;
+
+        // Video Call State Variables
+        let videoSender = null;
+        let placeholderTrack = null;
+        let realCameraTrack = null;
+        let realCameraStream = null;
+
+        const rtcConfig = {
+            iceServers: [
+                { urls: 'stun:stun.l.google.com:19302' },
+                { urls: 'stun:stun1.l.google.com:19302' },
+                { urls: 'stun:stun2.l.google.com:19302' },
+                { urls: 'stun:stun3.l.google.com:19302' },
+                { urls: 'stun:stun4.l.google.com:19302' }
+            ]
+        };
+
+        // Initialize Call
+        async function init() {
+            try {
+                log("Connecting...");
+                
+                // Active browser compatibility check
+                if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                    throw new Error("WebRTC navigator.mediaDevices.getUserMedia is NOT supported. Make sure you are using an HTTPS secure context.");
+                }
+                
+                log("Initializing media devices...");
+                
+                let constraints = { 
+                    audio: {
+                        echoCancellation: true,
+                        noiseSuppression: true,
+                        autoGainControl: true
+                    } 
+                };
+                if (isVideoCall) {
+                    log("Connecting audio and video...");
+                    constraints.video = {
+                        facingMode: 'user',
+                        width: { ideal: 640 },
+                        height: { ideal: 480 }
+                    };
+                }
+
+                try {
+                    localStream = await navigator.mediaDevices.getUserMedia(constraints);
+                } catch (constraintErr) {
+                    log("Retrying standard media constraints...");
+                    let fallbackConstraints = { audio: true };
+                    if (isVideoCall) {
+                        fallbackConstraints.video = true;
+                    }
+                    localStream = await navigator.mediaDevices.getUserMedia(fallbackConstraints);
+                }
+                log("Media devices initialized.");
+                document.getElementById('info').innerText = "Media connected. Setting up connection...";
+                
+                // Get local video track if in video mode
+                if (isVideoCall) {
+                    realCameraTrack = localStream.getVideoTracks()[0];
+                    realCameraStream = new MediaStream([realCameraTrack]); // Pure video stream for local preview
+                    log("Camera and mic connected.");
+                    
+                    const localVideo = document.getElementById('localVideo');
+                    if (localVideo) {
+                        localVideo.srcObject = realCameraStream;
+                        localVideo.muted = true;
+                        localVideo.play().catch(e => log("localVideo.play() failed: " + e.message));
+                    }
+                    
+                    const videoContainer = document.getElementById('videoContainer');
+                    if (videoContainer) {
+                        videoContainer.style.display = 'block';
+                    }
+                }
+
+                // Create placeholder video track using hidden canvas
+                try {
+                    const canvas = document.createElement('canvas');
+                    canvas.width = 320;
+                    canvas.height = 240;
+                    const ctx = canvas.getContext('2d');
+                    ctx.fillStyle = '#0b0f19';
+                    ctx.fillRect(0, 0, canvas.width, canvas.height);
+                    
+                    ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
+                    ctx.font = '14px Arial';
+                    ctx.textAlign = 'center';
+                    ctx.fillText('Camera is off', 160, 120);
+
+                    const placeholderStream = canvas.captureStream ? canvas.captureStream(5) : canvas.webkitCaptureStream(5);
+                    placeholderTrack = placeholderStream.getVideoTracks()[0];
+                    log("Canvas placeholder track generated.");
+                } catch (canvasErr) {
+                    log("Canvas capture stream error: " + canvasErr.message);
+                }
+
+                // Create RTCPeerConnection
+                pc = new RTCPeerConnection(rtcConfig);
+                
+                // Add local audio tracks to peer connection
+                localStream.getAudioTracks().forEach(track => {
+                    pc.addTrack(track, localStream);
+                });
+
+                // Add live or placeholder video track
+                if (isVideoCall && realCameraTrack) {
+                    videoSender = pc.addTrack(realCameraTrack, localStream);
+                    log("Live video track negotiated.");
+                } else if (placeholderTrack) {
+                    videoSender = pc.addTrack(placeholderTrack, localStream);
+                    log("Placeholder video track negotiated.");
+                }
+
+                // Handle ICE Candidate gathering
+                pc.onicecandidate = (event) => {
+                    if (event.candidate) {
+                        sendIceCandidate(event.candidate);
+                    }
+                };
+
+                // Handle remote stream
+                pc.ontrack = (event) => {
+                    log("Received remote track: " + event.track.kind);
+                    let stream = (event.streams && event.streams[0]) ? event.streams[0] : null;
+                    if (!stream) {
+                        log("event.streams is empty. Constructing custom MediaStream from track.");
+                        stream = new MediaStream([event.track]);
+                    }
+                    
+                    if (event.track.kind === 'audio') {
+                        setupAudioAmplifier(stream);
+                    } else if (event.track.kind === 'video') {
+                        const remoteVideo = document.getElementById('remoteVideo');
+                        if (remoteVideo) {
+                            remoteVideo.srcObject = stream;
+                            log("Remote video track successfully bound.");
+                            remoteVideo.play().catch(e => log("remoteVideo.play() failed: " + e.message));
+                            
+                            // Remove connecting class to shrink local video and show remote video
+                            const videoContainer = document.getElementById('videoContainer');
+                            if (videoContainer) {
+                                videoContainer.classList.remove('connecting');
+                            }
+                        }
+                    }
+                };
+
+                pc.onconnectionstatechange = () => {
+                    log(`Connection state changed: ${pc.connectionState}`);
+                    notifyRN('connectionState', { state: pc.connectionState });
+                    if (pc.connectionState === 'connected') {
+                        log("Call Connected!");
+                        document.getElementById('info').innerText = "Connected! Real-time voice active.";
+                        notifyRN('active'); // Fallback to transition UI state to Active in RN
+                        
+                        // Remove connecting class to shrink local video and show remote video
+                        const videoContainer = document.getElementById('videoContainer');
+                        if (videoContainer) {
+                            videoContainer.classList.remove('connecting');
+                        }
+                    } else if (pc.connectionState === 'disconnected' || pc.connectionState === 'failed') {
+                        log("Call Disconnected.");
+                        document.getElementById('info').innerText = "Disconnected.";
+                        notifyRN('ended');
+                    }
+                };
+
+                // Proceed based on role
+                if (role === 'caller') {
+                    await startCallAsCaller();
+                } else if (role === 'receiver') {
+                    await answerCallAsReceiver();
+                } else {
+                    log("Error: Invalid role specified.");
+                }
+
+                // If it is a video call, notify RN that video mode is active
+                if (isVideoCall) {
+                    notifyRN('video_mode_changed', { mode: 'video' });
+                }
+
+            } catch (err) {
+                log("Error getting microphone: " + err.message);
+                document.getElementById('status').innerText = "Microphone error";
+                document.getElementById('info').innerText = "Please ensure microphone permission is allowed.";
+                notifyRN('error', { message: err.message });
+            }
+        }
+
+        // Web Audio API volume control for Speaker Button functionality with safe fallback
+        function setupAudioAmplifier(stream) {
+            remoteStream = stream;
+            const audioEl = document.getElementById('remoteAudio');
+            
+            // WebRTC needs an audio element to bind the stream to and play it
+            audioEl.srcObject = stream;
+            audioEl.muted = false; // Default: unmuted audio element as safe fallback!
+            audioEl.volume = 1.0;
+            
+            try {
+                const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+                audioContext = new AudioContextClass();
+                sourceNode = audioContext.createMediaStreamSource(stream);
+                gainNode = audioContext.createGain();
+                gainNode.gain.value = isSpeakerOn ? 3.5 : 1.0; // Respect pre-selected speaker status
+                
+                sourceNode.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                // Safe callback: only mute raw audio element if AudioContext is successfully running!
+                audioContext.onstatechange = () => {
+                    log(`AudioContext state: ${audioContext.state}`);
+                    if (audioContext.state === 'running') {
+                        audioEl.muted = true; // Mute raw audio to prevent echo
+                    } else {
+                        audioEl.muted = false; // Fallback to raw element to ensure voice is heard
+                    }
+                };
+
+                // Request resumption immediately
+                audioContext.resume().then(() => {
+                    log(`AudioContext initial resume completed. State: ${audioContext.state}`);
+                });
+                
+                log("Web Audio Context routing completed successfully.");
+            } catch (e) {
+                log("AudioContext boost not supported. Falling back to default audio: " + e.message);
+                audioEl.muted = false;
+            }
+            
+            notifyRN('active');
+        }
+
+        // START CALL - CALLER
+        async function startCallAsCaller() {
+            log("Creating SDP offer...");
+            const offer = await pc.createOffer();
+            await pc.setLocalDescription(offer);
+            
+            // If callId is already created by React Native, upload SDP offer directly
+            if (callId) {
+                log(`Uploading SDP offer for pre-created Call ID: ${callId}...`);
+                try {
+                    const res = await fetch(`${callApiUrl}?action=set_sdp_offer`, {
+                        method: 'POST',
+                        headers: { 
+                            'Content-Type': 'application/json',
+                            'ngrok-skip-browser-warning': 'true'
+                        },
+                        body: JSON.stringify({
+                            call_id: callId,
+                            sdp_offer: JSON.stringify(offer)
+                        })
+                    });
+                    const result = await res.json();
+                    if (result.status === 'success') {
+                        log("SDP offer uploaded. Waiting for answer...");
+                        startSignalingPoll();
+                    } else {
+                        log("Failed to upload SDP offer: " + result.message);
+                        notifyRN('error', { message: result.message });
+                    }
+                } catch (err) {
+                    log("Network error setting SDP offer: " + err.message);
+                    notifyRN('error', { message: err.message });
+                }
+                return;
+            }
+
+            // Fallback (create call session on the fly if callId not passed)
+            log("Sending SDP offer to backend to initiate call...");
+            try {
+                const res = await fetch(`${callApiUrl}?action=start_call`, {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'ngrok-skip-browser-warning': 'true'
+                    },
+                    body: JSON.stringify({
+                        booking_id: bookingId,
+                        caller_id: userId,
+                        receiver_id: targetId,
+                        sdp_offer: JSON.stringify(offer)
+                    })
+                });
+                
+                const result = await res.json();
+                if (result.status === 'success') {
+                    callId = result.data.id;
+                    log(`Call initiated! Call ID: ${callId}. Waiting for answer...`);
+                    notifyRN('initiated', { callId: callId });
+                    
+                    // Start polling for receiver response
+                    startSignalingPoll();
+                } else {
+                    log("Failed to start call: " + result.message);
+                    notifyRN('error', { message: result.message });
+                }
+            } catch (err) {
+                log("Network error initiating call: " + err.message);
+                notifyRN('error', { message: err.message });
+            }
+        }
+
+        // ANSWER CALL - RECEIVER
+        async function answerCallAsReceiver() {
+            if (!callId) {
+                log("Error: Receiver missing Call ID. Fetching latest call for booking...");
+                await fetchLatestCall();
+            }
+            
+            log(`Initiating receiver signaling poll for Call ID: ${callId}...`);
+            startSignalingPoll();
+        }
+
+        async function fetchLatestCall() {
+            try {
+                const res = await fetch(`${callApiUrl}?action=get_call_status&booking_id=${bookingId}`, {
+                    headers: { 'ngrok-skip-browser-warning': 'true' }
+                });
+                const result = await res.json();
+                if (result.status === 'success' && result.data) {
+                    callId = result.data.id;
+                    log(`Fetched latest Call ID: ${callId}`);
+                }
+            } catch (err) {
+                log("Error fetching latest call: " + err.message);
+            }
+        }
+
+        // SIGNALING POLL (SDP & ICE Candidates)
+        function startSignalingPoll() {
+            if (signalingInterval) clearInterval(signalingInterval);
+            
+            signalingInterval = setInterval(async () => {
+                if (!callId) return;
+                
+                try {
+                    const res = await fetch(`${callApiUrl}?action=get_call_status&call_id=${callId}`, {
+                        headers: { 'ngrok-skip-browser-warning': 'true' }
+                    });
+                    const result = await res.json();
+                    
+                    if (result.status === 'success' && result.data) {
+                        const callData = result.data;
+                        
+                        // Check if call was ended
+                        if (callData.status === 'ended') {
+                            log("Call ended by remote peer.");
+                            clearInterval(signalingInterval);
+                            notifyRN('ended');
+                            return;
+                        }
+                        
+                        // For caller: Wait for answer
+                        if (role === 'caller' && !pc.remoteDescription && callData.sdp_answer) {
+                            try {
+                                log("SDP answer received. Setting remote description...");
+                                const answer = JSON.parse(callData.sdp_answer);
+                                await pc.setRemoteDescription(new RTCSessionDescription(answer));
+                            } catch (sdpAnswerErr) {
+                                log("Error processing SDP answer: " + sdpAnswerErr.message);
+                            }
+                        }
+
+                        // For receiver: Wait for offer
+                        if (role === 'receiver' && !pc.remoteDescription && callData.sdp_offer) {
+                            try {
+                                log("SDP offer received. Setting remote description...");
+                                const offer = JSON.parse(callData.sdp_offer);
+                                await pc.setRemoteDescription(new RTCSessionDescription(offer));
+                                
+                                log("Creating SDP answer...");
+                                const answer = await pc.createAnswer();
+                                await pc.setLocalDescription(answer);
+                                
+                                log("Sending SDP answer to backend...");
+                                await fetch(`${callApiUrl}?action=answer_call`, {
+                                    method: 'POST',
+                                    headers: { 
+                                        'Content-Type': 'application/json',
+                                        'ngrok-skip-browser-warning': 'true'
+                                    },
+                                    body: JSON.stringify({
+                                        call_id: callId,
+                                        sdp_answer: JSON.stringify(answer)
+                                    })
+                                });
+                                log("SDP answer sent to backend. Peer connection ready.");
+                            } catch (e) {
+                                log("Error processing SDP offer inside poll: " + e.message);
+                            }
+                        }
+                        
+                        // Process candidates (only if remote description is already set!)
+                        if (pc.remoteDescription) {
+                            const remoteCandidatesCol = (role === 'caller') ? 'receiver_candidates' : 'caller_candidates';
+                            try {
+                                const candidatesStr = callData[remoteCandidatesCol];
+                                if (candidatesStr) {
+                                    const remoteCandidates = JSON.parse(candidatesStr);
+                                    if (Array.isArray(remoteCandidates)) {
+                                        for (const cand of remoteCandidates) {
+                                            const candStr = JSON.stringify(cand);
+                                            if (!processedCandidates.has(candStr)) {
+                                                processedCandidates.add(candStr);
+                                                try {
+                                                    log("Adding remote ICE Candidate...");
+                                                    await pc.addIceCandidate(new RTCIceCandidate(cand));
+                                                } catch (e) {
+                                                    log("Error adding candidate: " + e.message);
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            } catch (candErr) {
+                                log("Error processing candidates: " + candErr.message);
+                            }
+                        }
+                    }
+                } catch (err) {
+                    log("Signaling poll error: " + err.message);
+                }
+            }, 1500);
+        }
+
+        // SEND ICE CANDIDATE
+        async function sendIceCandidate(candidate) {
+            if (!callId) return;
+            
+            try {
+                await fetch(`${callApiUrl}?action=add_candidate`, {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'ngrok-skip-browser-warning': 'true'
+                    },
+                    body: JSON.stringify({
+                        call_id: callId,
+                        role: role,
+                        candidate: JSON.stringify(candidate)
+                    })
+                });
+                log("Sent ICE Candidate to backend.");
+            } catch (err) {
+                log("Error sending ICE candidate: " + err.message);
+            }
+        }
+
+        // INTERACTIVE CONTROL ACTIONS FROM REACT NATIVE UI
+        window.addEventListener('message', (event) => {
+            try {
+                let data = event.data;
+                if (typeof data === 'string') {
+                    try {
+                        data = JSON.parse(data);
+                    } catch (e) {
+                        return; // Ignore non-JSON strings
+                    }
+                }
+                
+                if (!data || !data.action) return;
+                log(`Received RN action: ${data.action}`);
+                
+                if (data.action === 'mute') {
+                    toggleMute(data.value);
+                } else if (data.action === 'speaker') {
+                    toggleSpeaker(data.value);
+                } else if (data.action === 'end') {
+                    endCall();
+                } else if (data.action === 'enable_video') {
+                    toggleVideoCall(true);
+                } else if (data.action === 'disable_video') {
+                    toggleVideoCall(false);
+                }
+            } catch (err) {
+                log("Error processing message from React Native: " + err.message);
+            }
+        });
+
+        // DYNAMIC AUDIO/VIDEO SWITCHING CAPABILITIES
+        async function toggleVideoCall(enabled) {
+            log(`Toggle Video Call requested: ${enabled}`);
+            const videoContainer = document.getElementById('videoContainer');
+            const localVideo = document.getElementById('localVideo');
+            
+            if (enabled) {
+                // If realCameraTrack already exists (pre-acquired at initialization), reuse it!
+                if (realCameraTrack && realCameraStream) {
+                    log("Reusing pre-acquired camera stream and track.");
+                    if (localVideo) {
+                        localVideo.srcObject = realCameraStream;
+                        localVideo.muted = true;
+                        localVideo.play().catch(e => log("localVideo.play() failed: " + e.message));
+                    }
+                    if (videoSender && realCameraTrack) {
+                        await videoSender.replaceTrack(realCameraTrack);
+                    }
+                    if (videoContainer) {
+                        videoContainer.style.display = 'block';
+                    }
+                    notifyRN('video_mode_changed', { mode: 'video' });
+                    return;
+                }
+
+                try {
+                    log("Accessing camera...");
+                    try {
+                        // Request camera natively with resolution ideals
+                        realCameraStream = await navigator.mediaDevices.getUserMedia({
+                            video: {
+                                facingMode: 'user',
+                                width: { ideal: 640 },
+                                height: { ideal: 480 }
+                            },
+                            audio: false
+                        });
+                    } catch (videoConstraintErr) {
+                        log("Advanced camera constraints failed, retrying with simple video: true. Error: " + videoConstraintErr.message);
+                        realCameraStream = await navigator.mediaDevices.getUserMedia({
+                            video: true,
+                            audio: false
+                        });
+                    }
+                    
+                    realCameraTrack = realCameraStream.getVideoTracks()[0];
+                    log("Camera access granted successfully.");
+                    
+                    if (localVideo) {
+                        localVideo.srcObject = realCameraStream;
+                        localVideo.muted = true;
+                        // Enforce video frame paints on mobile WebView
+                        localVideo.play().catch(e => log("localVideo.play() failed: " + e.message));
+                    }
+                    
+                    if (videoSender && realCameraTrack) {
+                        log("Swapping placeholder video track with live camera track...");
+                        await videoSender.replaceTrack(realCameraTrack);
+                        log("Video track successfully swapped.");
+                    }
+                    
+                    if (videoContainer) {
+                        videoContainer.style.display = 'block';
+                    }
+                    
+                    notifyRN('video_mode_changed', { mode: 'video' });
+                } catch (e) {
+                    log("Failed to acquire camera track: " + e.message);
+                    notifyRN('error', { message: "Camera access failed: " + e.message });
+                }
+            } else {
+                // Turn off camera
+                log("Turning off camera and returning to voice mode...");
+                if (videoContainer) {
+                    videoContainer.style.display = 'none';
+                }
+                
+                if (videoSender && placeholderTrack) {
+                    log("Restoring canvas placeholder video track...");
+                    await videoSender.replaceTrack(placeholderTrack);
+                    log("Placeholder video track restored.");
+                }
+                
+                if (realCameraTrack) {
+                    realCameraTrack.stop();
+                    realCameraTrack = null;
+                }
+                
+                if (realCameraStream) {
+                    realCameraStream.getTracks().forEach(t => t.stop());
+                    realCameraStream = null;
+                }
+                
+                if (localVideo) {
+                    localVideo.srcObject = null;
+                }
+                
+                notifyRN('video_mode_changed', { mode: 'voice' });
+            }
+        }
+
+        // 1. MUTE OWN VOICE
+        function toggleMute(muteValue) {
+            isMuted = muteValue !== undefined ? muteValue : !isMuted;
+            if (localStream) {
+                localStream.getAudioTracks().forEach(track => {
+                    track.enabled = !isMuted;
+                });
+                log(isMuted ? "Microphone MUTED" : "Microphone UNMUTED");
+            }
+        }
+
+        // 2. SPEAKER BOOST (AMPLIFIER)
+        function toggleSpeaker(speakerValue) {
+            isSpeakerOn = speakerValue !== undefined ? speakerValue : !isSpeakerOn;
+            if (gainNode) {
+                // If Speaker is on, amplify sound 3.5x! Otherwise return to 1.0 (normal)
+                gainNode.gain.value = isSpeakerOn ? 3.5 : 1.0;
+                log(`Speaker mode changed. Volume gain: ${gainNode.gain.value}x`);
+                
+                // Explicitly resume context upon user interaction event
+                if (audioContext) {
+                    audioContext.resume().then(() => {
+                        log(`AudioContext state updated on speaker toggle: ${audioContext.state}`);
+                    });
+                }
+            } else {
+                // Fallback for audio element
+                const audioEl = document.getElementById('remoteAudio');
+                if (audioEl) {
+                    audioEl.muted = false;
+                    audioEl.volume = 1.0; 
+                    log("Speaker fallback to normal volume (AudioContext not active).");
+                }
+            }
+        }
+
+        // 3. END CALL
+        async function endCall() {
+            log("Ending call locally and notifying backend...");
+            clearInterval(signalingInterval);
+            
+            // Close peer connection
+            if (pc) {
+                pc.close();
+            }
+            
+            // Stop mic tracks
+            if (localStream) {
+                localStream.getTracks().forEach(track => track.stop());
+            }
+            
+            // Notify backend
+            if (callId) {
+                try {
+                    await fetch(`${callApiUrl}?action=end_call&call_id=${callId}`, {
+                        headers: { 'ngrok-skip-browser-warning': 'true' }
+                    });
+                } catch (e) {}
+            }
+            
+            log("Call ended.");
+            notifyRN('ended');
+        }
+
+        // Draggable handler for Local Self-Preview Video Popup
+        function initDraggableLocalVideo() {
+            const localVideo = document.getElementById('localVideo');
+            if (!localVideo) {
+                log("Local video element not found for drag initiation.");
+                return;
+            }
+
+            let isDragging = false;
+            let startX, startY;
+
+            localVideo.style.position = 'absolute';
+            localVideo.style.cursor = 'grab';
+
+            localVideo.addEventListener('mousedown', dragStart);
+            localVideo.addEventListener('touchstart', dragStart, { passive: false });
+
+            function dragStart(e) {
+                const videoContainer = document.getElementById('videoContainer');
+                if (videoContainer && videoContainer.classList.contains('connecting')) {
+                    log("Dragging disabled in connecting mode.");
+                    return;
+                }
+                e.preventDefault();
+                isDragging = true;
+                localVideo.style.cursor = 'grabbing';
+                
+                const clientX = e.type === 'touchstart' ? e.touches[0].clientX : e.clientX;
+                const clientY = e.type === 'touchstart' ? e.touches[0].clientY : e.clientY;
+                
+                const rect = localVideo.getBoundingClientRect();
+                startX = clientX - rect.left;
+                startY = clientY - rect.top;
+
+                document.addEventListener('mousemove', dragMove);
+                document.addEventListener('touchmove', dragMove, { passive: false });
+                document.addEventListener('mouseup', dragEnd);
+                document.addEventListener('touchend', dragEnd);
+            }
+
+            function dragMove(e) {
+                if (!isDragging) return;
+                e.preventDefault();
+                
+                const clientX = e.type === 'touchmove' ? e.touches[0].clientX : e.clientX;
+                const clientY = e.type === 'touchmove' ? e.touches[0].clientY : e.clientY;
+                
+                let newX = clientX - startX;
+                let newY = clientY - startY;
+
+                const viewportWidth = window.innerWidth;
+                const viewportHeight = window.innerHeight;
+                const elementWidth = localVideo.offsetWidth;
+                const elementHeight = localVideo.offsetHeight;
+
+                // Restrict movement coordinates inside layout bounds
+                if (newX < 0) newX = 0;
+                if (newY < 0) newY = 0;
+                if (newX + elementWidth > viewportWidth) newX = viewportWidth - elementWidth;
+                if (newY + elementHeight > viewportHeight) newY = viewportHeight - elementHeight;
+
+                localVideo.style.left = newX + 'px';
+                localVideo.style.top = newY + 'px';
+                
+                // Unset default absolute positioning parameters
+                localVideo.style.bottom = 'auto';
+                localVideo.style.right = 'auto';
+            }
+
+            function dragEnd(e) {
+                isDragging = false;
+                localVideo.style.cursor = 'grab';
+                document.removeEventListener('mousemove', dragMove);
+                document.removeEventListener('touchmove', dragMove);
+                document.removeEventListener('mouseup', dragEnd);
+                document.removeEventListener('touchend', dragEnd);
+            }
+        }
+
+        // Initialize drag-and-drop behaviors
+        initDraggableLocalVideo();
+
+        // Start initialization with a small 500ms delay to prevent WebView hardware permission race conditions
+        setTimeout(init, 500);
+    </script>
+</body>
+</html>

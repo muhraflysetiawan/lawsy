@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Prestige Legal AI</title>
+    
+    <!-- Scripts / Styles -->
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+</head>
+<body class="landingpage1 min-h-screen pt-24 relative overflow-x-hidden">
+    <!-- Background Image with White Gradient Overlay -->
+    <div class="absolute top-0 left-0 w-full h-[100vh] z-0 pointer-events-none">
+        <img src="/images/office_bg.png" class="w-full h-full object-cover object-top" />
+        <!-- White Gradient Overlay (60% opacity) -->
+        <div class="absolute inset-0 bg-gradient-to-r from-white/60 via-white/30 to-transparent"></div>
+    </div>
+    
+    <!-- Navbar -->
+    <nav class="fixed top-0 left-0 right-0 z-50 bg-white/30 backdrop-blur-xl border-b border-white/20">
+        <div class="max-w-[1440px] mx-auto px-10 h-20 flex items-center justify-between">
+            <!-- Logo -->
+            <div class="flex items-center gap-3">
+                <!-- Icon (Court/Building) -->
+                <svg class="w-7 h-7 text-[#1D5083]" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M10 2l-8 4v2h16V6l-8-4zM2 10h2v6H2v-6zm4 0h2v6H6v-6zm4 0h2v6h-2v-6zm4 0h2v6h-2v-6zm4 0h2v6h-2v-6zM1 18h18v2H1v-2z"/>
+                </svg>
+                <span class="text-2xl font-serif font-bold italic text-[#1D5083]">Lawsy</span>
+            </div>
+            
+            <!-- Action Button -->
+            <div>
+                <a href="{{ route('signin') }}" class="bg-[#1D5083] text-white px-6 py-2.5 rounded-full font-bold text-sm hover:bg-[#153c63] transition-all duration-300 flex items-center gap-2 shadow-lg shadow-[#1D5083]/10">
+                    Access Firm Portal
+                    <!-- Arrow Right Icon -->
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="min-h-[calc(100vh-5rem)] flex items-center justify-start p-10">
+        <!-- Glassmorphic Card -->
+        <div class="max-w-lg bg-white/70 backdrop-blur-xl p-8 rounded-3xl border border-white/50 shadow-xl shadow-black/5 transition-all duration-700 hover:shadow-floating hover:-translate-y-1" data-aos="fade-up" data-aos-duration="1500">
+        
+        <!-- Badge -->
+        <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#EBF5FF] border border-[#D0E7FF] text-[10px] uppercase tracking-widest font-bold text-[#1D5083] mb-8">
+            <!-- Shield Icon -->
+            <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 4.992-3.584 9.149-8 10.065-4.416-.916-8-5.073-8-10.065 0-.68.056-1.35.166-2.001zm7.834 2a1 1 0 00-1 1v3a1 1 0 001 1h3a1 1 0 001-1v-3a1 1 0 00-1-1h-3z" clip-rule="evenodd"></path></svg>
+            Enterprise Grade Security
+        </div>
+        
+        <!-- Heading -->
+        <h1 class="font-serif text-5xl font-bold text-[#1a1c1f] leading-[1.15] mb-6 tracking-tight">
+            Elite Jurisprudence.<br />
+            <span class="italic font-normal text-[#1D5083]">Powered by Precision Intelligence.</span>
+        </h1>
+        
+        <!-- Paragraph -->
+        <p class="font-sans text-base text-[#5c6066] mb-10 leading-relaxed">
+            Oversee your firm's operational efficiency from a single, secure command center. 
+            Designed specifically for managing partners and elite legal administrators.
+        </p>
+        
+        <!-- Buttons -->
+        <div class="flex items-center gap-8">
+            <button class="bg-[#1D5083] text-white px-8 py-3.5 rounded-xl font-bold hover:bg-[#153c63] hover:scale-[1.02] transition-all duration-300 shadow-lg shadow-[#1D5083]/20 hover:shadow-xl hover:shadow-[#1D5083]/30 flex items-center justify-center">
+                Access Firm Portal
+            </button>
+            
+            <button class="flex items-center gap-2 text-[#1D5083] font-bold hover:text-[#153c63] transition-all duration-300 group">
+                <!-- Play Icon -->
+                <div class="w-8 h-8 rounded-full border-2 border-[#1D5083] flex items-center justify-center group-hover:border-[#153c63] group-hover:scale-110 transition-all duration-300">
+                    <svg class="w-4 h-4 fill-currentColor" viewBox="0 0 20 20"><path d="M4.5 3.5v13L16 10 4.5 3.5z"></path></svg>
+                </div>
+                <span class="text-sm">View Capabilities</span>
+            </button>
+            </div>
+        </div>
+    </section>
+
+    </section>
+
+    <!-- Bento Features Section -->
+    <section class="relative py-20 bg-cover bg-center bg-no-repeat mt-0" style="background-image: url('/images/bookshelf_bg.png');">
+            <!-- White Gradient Overlay (Fade from White at top) -->
+            <div class="absolute inset-0 bg-gradient-to-b from-white via-white/70 to-transparent z-0" data-aos="fade-up"></div>
+            
+            <div class="max-w-7xl mx-auto px-6 relative z-10">
+                <!-- Heading -->
+                <div class="text-center mb-16" data-aos="fade-up">
+                    <h2 class="text-4xl font-serif font-bold text-[#1a1c1f] mb-4">Cognitive Augmentation for Legal Strategy</h2>
+                    <p class="text-[#1a1c1f] max-w-2xl mx-auto text-base font-medium">
+                        Deploy proprietary AI models to parse massive datasets, identify precedents, and optimize firm-wide resource allocation.
+                    </p>
+                </div>
+
+                <!-- Cards Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <!-- Card 1 -->
+                    <div class="group bg-white/70 backdrop-blur-xl p-8 rounded-2xl border border-white/50 shadow-xl shadow-black/5 flex flex-col items-start transition-all duration-500 hover:shadow-2xl hover:shadow-[#1D5083]/5 hover:-translate-y-2 hover:bg-white/90 cursor-pointer" data-aos="fade-right" data-aos-duration="1000">
+                        <!-- Icon -->
+                        <div class="w-12 h-12 bg-[#1D5083] text-white rounded-xl flex items-center justify-center mb-6 shadow-lg shadow-[#1D5083]/20 transform group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300">
+                            <!-- Scanner/Document Icon -->
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 4h-1m-4 10v1m-6-10H4m12 0a4 4 0 11-8 0 4 4 0 018 0zM8 12h4m-2-2v4"></path></svg>
+                        </div>
+                        <h3 class="text-2xl font-serif font-bold text-[#1a1c1f] mb-4">AI Document Analysis</h3>
+                        <p class="text-[#5c6066] mb-8 text-sm leading-relaxed">
+                            Instantly ingest and cross-reference thousands of case files. Our neural architecture flags anomalies and generates executive summaries in seconds.
+                        </p>
+                        <a href="#" class="text-[#1D5083] font-bold text-xs uppercase tracking-wider flex items-center gap-2 hover:text-[#153c63] transition-colors">
+                            Explore Analytics 
+                            <svg class="w-4 h-4 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                        </a>
+                    </div>
+
+                    <!-- Card 2 -->
+                    <div class="group bg-white/70 backdrop-blur-xl p-8 rounded-2xl border border-white/50 shadow-xl shadow-black/5 flex flex-col items-start transition-all duration-500 hover:shadow-2xl hover:shadow-[#1D5083]/5 hover:-translate-y-2 hover:bg-white/90 cursor-pointer" data-aos="fade-left" data-aos-duration="1500">
+                        <!-- Icon -->
+                        <div class="w-12 h-12 bg-white text-[#1D5083] rounded-xl flex items-center justify-center mb-6 shadow-lg border border-[#D0E7FF] transform group-hover:scale-110 group-hover:-rotate-3 transition-transform duration-300">
+                            <!-- Chart Icon -->
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 002 2h2a2 2 0 002-2z"></path></svg>
+                        </div>
+                        <h3 class="text-2xl font-serif font-bold text-[#1a1c1f] mb-4">Efficiency Metrics</h3>
+                        <p class="text-[#5c6066] mb-8 text-sm leading-relaxed">
+                            Real-time dashboards tracking billable utilization, client acquisition costs, and predictive churn models. Make data-backed decisions.
+                        </p>
+                        <a href="#" class="text-[#1D5083] font-bold text-xs uppercase tracking-wider flex items-center gap-2 hover:text-[#153c63] transition-colors">
+                            View Dashboards 
+                            <svg class="w-4 h-4 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- LandingPage3: Vision & Mission Section -->
+        <section class="landingpage3 py-28 lg:py-36 bg-[#F5F7FA] font-sans border-t border-[#E5E7EB]/50">
+            <div class="max-w-7xl mx-auto px-6 flex flex-col gap-32">
+                
+                <!-- TOP ROW: OUR VISION -->
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-16 items-center">
+                    <!-- Left Content (Larger) -->
+                    <div class="lg:col-span-5" data-aos="fade-right" data-aos-duration="800">
+                        <p class="text-[#1D5083] font-bold tracking-[0.2em] text-sm uppercase mb-6">OUR VISION</p>
+                        <h2 class="font-serif text-5xl md:text-6xl lg:text-[3.5rem] text-[#1A1A1A] leading-[1.1] mb-8 font-normal">Redefining the architecture of justice.</h2>
+                        <p class="text-[#6B7280] text-lg md:text-xl leading-relaxed max-w-xl font-light">
+                            We envision a legal landscape where technology and tradition harmonize to create an era of unprecedented judicial clarity.
+                        </p>
+                    </div>
+                    
+                    <!-- Right Content (3 Horizontal Features) -->
+                    <div class="lg:col-span-7 grid grid-cols-1 sm:grid-cols-3 gap-6 mt-4 lg:mt-0" data-aos="fade-left" data-aos-duration="800">
+                        <!-- Feature 1 -->
+                        <div class="bg-[#FFFFFF] p-6 xl:p-8 rounded-2xl border border-[#E5E7EB] shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col items-start group cursor-default h-full">
+                            <div class="w-12 h-12 bg-[#F5F7FA] rounded-full flex items-center justify-center mb-5 text-[#1D5083] border border-[#E5E7EB] group-hover:bg-[#1D5083] group-hover:text-white transition-colors duration-300 shrink-0">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                            </div>
+                            <h4 class="text-[#1A1A1A] font-bold text-sm xl:text-base mb-2">Technological Excellence</h4>
+                            <p class="text-[#6B7280] text-xs xl:text-sm leading-relaxed">Pioneering AI algorithms tailored for legal precision.</p>
+                        </div>
+                        <!-- Feature 2 -->
+                        <div class="bg-[#FFFFFF] p-6 xl:p-8 rounded-2xl border border-[#E5E7EB] shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col items-start group cursor-default h-full">
+                            <div class="w-12 h-12 bg-[#F5F7FA] rounded-full flex items-center justify-center mb-5 text-[#1D5083] border border-[#E5E7EB] group-hover:bg-[#1D5083] group-hover:text-white transition-colors duration-300 shrink-0">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+                            </div>
+                            <h4 class="text-[#1A1A1A] font-bold text-sm xl:text-base mb-2">Judicial Integrity</h4>
+                            <p class="text-[#6B7280] text-xs xl:text-sm leading-relaxed">Upholding the highest standards of data security and ethics.</p>
+                        </div>
+                        <!-- Feature 3 -->
+                        <div class="bg-[#FFFFFF] p-6 xl:p-8 rounded-2xl border border-[#E5E7EB] shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col items-start group cursor-default h-full">
+                            <div class="w-12 h-12 bg-[#F5F7FA] rounded-full flex items-center justify-center mb-5 text-[#1D5083] border border-[#E5E7EB] group-hover:bg-[#1D5083] group-hover:text-white transition-colors duration-300 shrink-0">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"></path></svg>
+                            </div>
+                            <h4 class="text-[#1A1A1A] font-bold text-sm xl:text-base mb-2">Global Accessibility</h4>
+                            <p class="text-[#6B7280] text-xs xl:text-sm leading-relaxed">Democratizing elite legal tools for firms worldwide.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- BOTTOM ROW: OUR MISSION -->
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-16 items-center">
+                    <!-- Left Side Cards (3 Premium Cards) -->
+                    <div class="lg:col-span-7 grid grid-cols-1 sm:grid-cols-3 gap-6 order-2 lg:order-1" data-aos="fade-right" data-aos-duration="800">
+                        <!-- Card 1 -->
+                        <div class="bg-[#FFFFFF] p-8 rounded-2xl border border-[#E5E7EB] shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col items-start group cursor-default h-full">
+                            <div class="w-14 h-14 bg-[#F5F7FA] rounded-full flex items-center justify-center mb-6 text-[#1D5083] border border-[#E5E7EB] group-hover:bg-[#1D5083] group-hover:text-white transition-colors duration-300">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                            </div>
+                            <h4 class="text-[#1A1A1A] font-bold text-base mb-3">Empowering Professionals</h4>
+                            <p class="text-[#6B7280] text-sm leading-relaxed">Augmenting lawyers with superhuman analytical capabilities.</p>
+                        </div>
+                        
+                        <!-- Card 2 -->
+                        <div class="bg-[#FFFFFF] p-8 rounded-2xl border border-[#E5E7EB] shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col items-start group cursor-default h-full">
+                            <div class="w-14 h-14 bg-[#F5F7FA] rounded-full flex items-center justify-center mb-6 text-[#1D5083] border border-[#E5E7EB] group-hover:bg-[#1D5083] group-hover:text-white transition-colors duration-300">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"></path></svg>
+                            </div>
+                            <h4 class="text-[#1A1A1A] font-bold text-base mb-3">Ensuring Compliance</h4>
+                            <p class="text-[#6B7280] text-sm leading-relaxed">Automated regulatory adherence across all jurisdictions.</p>
+                        </div>
+
+                        <!-- Card 3 -->
+                        <div class="bg-[#FFFFFF] p-8 rounded-2xl border border-[#E5E7EB] shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col items-start group cursor-default h-full">
+                            <div class="w-14 h-14 bg-[#F5F7FA] rounded-full flex items-center justify-center mb-6 text-[#1D5083] border border-[#E5E7EB] group-hover:bg-[#1D5083] group-hover:text-white transition-colors duration-300">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
+                            </div>
+                            <h4 class="text-[#1A1A1A] font-bold text-base mb-3">Accelerating Insights</h4>
+                            <p class="text-[#6B7280] text-sm leading-relaxed">Transforming days of document review into seconds.</p>
+                        </div>
+                    </div>
+
+                    <!-- Right Content (Text) -->
+                    <div class="lg:col-span-5 order-1 lg:order-2 lg:pl-10" data-aos="fade-left" data-aos-duration="800">
+                        <p class="text-[#1D5083] font-bold tracking-[0.2em] text-sm uppercase mb-6">OUR MISSION</p>
+                        <h2 class="font-serif text-5xl md:text-5xl lg:text-[3.5rem] text-[#1A1A1A] leading-[1.1] mb-8 font-normal">Precision-engineered infrastructure.</h2>
+                        <p class="text-[#6B7280] text-lg md:text-xl leading-relaxed font-light">
+                            Our mission is to provide the technological backbone that allows elite firms to operate at the peak of their potential.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- LandingPage4: Platform Intelligence Section -->
+        <section class="landingpage4 relative py-28 lg:py-36 bg-[#FFFFFF] mt-0 border-t border-[#E5E7EB]/50">
+            <!-- Background Image -->
+            <div class="absolute inset-0 bg-cover bg-center bg-no-repeat z-0" style="background-image: url('{{ asset('images/landingpage4_bg_gold.png') }}');"></div>
+            <!-- White Overlay with reduced opacity -->
+            <div class="absolute inset-0 bg-white/60 z-0"></div>
+            
+            <div class="max-w-7xl mx-auto px-6 flex flex-col items-center gap-16 relative z-10">
+                
+                <!-- Heading -->
+                <div class="flex flex-col items-center max-w-3xl text-center">
+                    <p class="text-[#1D5083] font-bold tracking-[0.2em] text-[11px] uppercase mb-5">PLATFORM INTELLIGENCE</p>
+                    <h2 class="font-serif text-4xl md:text-5xl lg:text-[3.25rem] text-[#1D5083] leading-[1.2] mb-6 font-normal">Unprecedented Oversight</h2>
+                    <p class="text-[#5c6066] text-lg lg:text-[19px] leading-relaxed font-light">
+                        Comprehensive data visualizations for strategic resource allocation and performance analysis.
+                    </p>
+                </div>
+
+                <!-- Dashboard UI Card -->
+                <div class="w-full bg-[#FFFFFF] rounded-[2rem] shadow-2xl shadow-[#1D5083]/5 border border-[#E5E7EB] p-8 lg:p-12 transition-all duration-500 hover:shadow-xl hover:shadow-[#1D5083]/10" data-aos="flip-down" data-aos-duration="1500">
+                    <div class="grid grid-cols-1 lg:grid-cols-12 gap-10">
+                        
+                        <!-- Left Side: Bar Chart -->
+                        <div class="lg:col-span-8 flex flex-col h-full justify-between">
+                            <div class="flex justify-between items-center mb-10">
+                                <h3 class="font-serif text-2xl lg:text-[28px] text-[#1A1A1A]">Firm Utilization Rate</h3>
+                                <span class="bg-[#EBF3FA] text-[#1D5083] px-3.5 py-1.5 rounded-full text-xs font-bold tracking-wide">+12% YTD</span>
+                            </div>
+                            
+                            <!-- Bars -->
+                            <div class="flex items-end justify-between gap-3 sm:gap-5 h-64 lg:h-72 mt-4">
+                                <!-- Bar 1 (35%) -->
+                                <div class="group flex flex-col items-center gap-4 w-full h-full justify-end relative">
+                                    <div class="w-full bg-[#BACBD9] rounded-t-lg h-[35%] group-hover:bg-[#95B2CC] transition-all duration-300 transform group-hover:scale-y-105 origin-bottom cursor-pointer relative">
+                                        <!-- Tooltip -->
+                                        <div class="absolute -top-2 left-1/2 transform -translate-x-1/2 -translate-y-full bg-[#1D5083] text-white text-[10px] font-bold px-2 py-1 rounded-md shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
+                                            35%
+                                            <!-- Arrow -->
+                                            <div class="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-1/2 rotate-45 w-1.5 h-1.5 bg-[#1D5083]"></div>
+                                        </div>
+                                    </div>
+                                    <span class="text-[11px] text-[#6B7280] font-medium uppercase tracking-wider">Jan</span>
+                                </div>
+                                <!-- Bar 2 (45%) -->
+                                <div class="group flex flex-col items-center gap-4 w-full h-full justify-end relative">
+                                    <div class="w-full bg-[#9BB4C7] rounded-t-lg h-[45%] group-hover:bg-[#7D9EBC] transition-all duration-300 transform group-hover:scale-y-105 origin-bottom cursor-pointer relative">
+                                        <!-- Tooltip -->
+                                        <div class="absolute -top-2 left-1/2 transform -translate-x-1/2 -translate-y-full bg-[#1D5083] text-white text-[10px] font-bold px-2 py-1 rounded-md shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
+                                            45%
+                                            <!-- Arrow -->
+                                            <div class="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-1/2 rotate-45 w-1.5 h-1.5 bg-[#1D5083]"></div>
+                                        </div>
+                                    </div>
+                                    <span class="text-[11px] text-[#6B7280] font-medium uppercase tracking-wider">Feb</span>
+                                </div>
+                                <!-- Bar 3 (42%) -->
+                                <div class="group flex flex-col items-center gap-4 w-full h-full justify-end relative">
+                                    <div class="w-full bg-[#A5BDCE] rounded-t-lg h-[42%] group-hover:bg-[#8AA9C4] transition-all duration-300 transform group-hover:scale-y-105 origin-bottom cursor-pointer relative">
+                                        <!-- Tooltip -->
+                                        <div class="absolute -top-2 left-1/2 transform -translate-x-1/2 -translate-y-full bg-[#1D5083] text-white text-[10px] font-bold px-2 py-1 rounded-md shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
+                                            42%
+                                            <!-- Arrow -->
+                                            <div class="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-1/2 rotate-45 w-1.5 h-1.5 bg-[#1D5083]"></div>
+                                        </div>
+                                    </div>
+                                    <span class="text-[11px] text-[#6B7280] font-medium uppercase tracking-wider">Mar</span>
+                                </div>
+                                <!-- Bar 4 (60%) -->
+                                <div class="group flex flex-col items-center gap-4 w-full h-full justify-end relative">
+                                    <div class="w-full bg-[#7D98B2] rounded-t-lg h-[60%] group-hover:bg-[#5C84A8] transition-all duration-300 transform group-hover:scale-y-105 origin-bottom cursor-pointer relative">
+                                        <!-- Tooltip -->
+                                        <div class="absolute -top-2 left-1/2 transform -translate-x-1/2 -translate-y-full bg-[#1D5083] text-white text-[10px] font-bold px-2 py-1 rounded-md shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
+                                            60%
+                                            <!-- Arrow -->
+                                            <div class="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-1/2 rotate-45 w-1.5 h-1.5 bg-[#1D5083]"></div>
+                                        </div>
+                                    </div>
+                                    <span class="text-[11px] text-[#6B7280] font-medium uppercase tracking-wider">Apr</span>
+                                </div>
+                                <!-- Bar 5 (75%) -->
+                                <div class="group flex flex-col items-center gap-4 w-full h-full justify-end relative">
+                                    <div class="w-full bg-[#557897] rounded-t-lg h-[75%] group-hover:bg-[#3B6A94] transition-all duration-300 transform group-hover:scale-y-105 origin-bottom cursor-pointer relative">
+                                        <!-- Tooltip -->
+                                        <div class="absolute -top-2 left-1/2 transform -translate-x-1/2 -translate-y-full bg-[#1D5083] text-white text-[10px] font-bold px-2 py-1 rounded-md shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
+                                            75%
+                                            <!-- Arrow -->
+                                            <div class="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-1/2 rotate-45 w-1.5 h-1.5 bg-[#1D5083]"></div>
+                                        </div>
+                                    </div>
+                                    <span class="text-[11px] text-[#6B7280] font-medium uppercase tracking-wider">May</span>
+                                </div>
+                                <!-- Bar 6 (95%) -->
+                                <div class="group flex flex-col items-center gap-4 w-full h-full justify-end relative">
+                                    <div class="w-full bg-[#1D5083] rounded-t-lg h-[95%] shadow-lg shadow-[#1D5083]/20 group-hover:bg-[#153c63] transition-all duration-300 transform group-hover:scale-y-105 origin-bottom cursor-pointer relative">
+                                        <!-- Tooltip -->
+                                        <div class="absolute -top-2 left-1/2 transform -translate-x-1/2 -translate-y-full bg-[#1D5083] text-white text-[10px] font-bold px-2 py-1 rounded-md shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
+                                            95%
+                                            <!-- Arrow -->
+                                            <div class="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-1/2 rotate-45 w-1.5 h-1.5 bg-[#1D5083]"></div>
+                                        </div>
+                                    </div>
+                                    <span class="text-[11px] text-[#1A1A1A] font-bold uppercase tracking-wider">Jun</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Right Side: Metrics Cards -->
+                        <div class="lg:col-span-4 flex flex-col gap-6">
+                            <!-- Metric 1: Top Performer -->
+                            <div class="group bg-[#FCFDFF] border border-[#F0F2F5] rounded-2xl p-7 flex flex-col items-start w-full transition-all duration-300 hover:shadow-xl hover:shadow-[#1D5083]/5 hover:-translate-y-1 cursor-pointer">
+                                <!-- Icon User Check -->
+                                <svg class="w-6 h-6 text-[#1D5083] mb-4 transform group-hover:scale-110 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M22 11.5L20 13.5L18.5 12"></path>
+                                </svg>
+                                <p class="text-[#8B95A5] font-bold text-[9px] tracking-[0.15em] uppercase mb-2">TOP PERFORMER</p>
+                                <h4 class="font-serif text-[#1A1A1A] text-[22px] mb-2 leading-none">Sarah Jenkins</h4>
+                                <p class="text-[#1D5083] text-xs font-bold">98% Billable Target</p>
+                            </div>
+                            
+                            <!-- Metric 2: Realization -->
+                            <div class="group bg-[#FCFDFF] border border-[#F0F2F5] rounded-2xl p-7 flex flex-col items-start w-full h-full justify-center transition-all duration-300 hover:shadow-xl hover:shadow-[#1D5083]/5 hover:-translate-y-1 cursor-pointer">
+                                <!-- Icon Trending Up -->
+                                <svg class="w-6 h-6 text-[#1D5083] mb-4 transform group-hover:scale-110 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+                                </svg>
+                                <p class="text-[#8B95A5] font-bold text-[9px] tracking-[0.15em] uppercase mb-2">REALIZATION</p>
+                                <h4 class="font-serif text-[#1A1A1A] text-[32px] mb-2 leading-none">94.2%</h4>
+                                <p class="text-[#10B981] text-xs font-bold">+2.1% from Q1</p>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- LandingPage5: Core Capabilities -->
+        <section class="landingpage5 relative py-28 lg:py-36 bg-white border-t border-[#E5E7EB]/50">
+            <div class="max-w-7xl mx-auto px-6 flex flex-col items-center gap-16">
+                
+                <!-- Heading -->
+                <div class="flex flex-col items-center max-w-3xl text-center">
+                    <h2 class="font-serif text-4xl md:text-5xl text-[#1A1A1A] leading-[1.2] mb-4 font-normal">Core Capabilities</h2>
+                    <p class="text-[#6B7280] text-lg lg:text-[19px] leading-relaxed font-light">
+                        The tools you need to manage a modern, elite legal practice.
+                    </p>
+                </div>
+
+                <!-- Cards Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8 w-full">
+                    
+                    <!-- Card 1: Attorney Accreditation -->
+                    <div class="bg-[#F9FAFB] rounded-2xl p-10 flex flex-col items-start gap-6 border border-[#E5E7EB]/40 transition-all duration-500 hover:shadow-2xl hover:shadow-[#1D5083]/5 hover:-translate-y-2 hover:bg-white hover:border-[#1D5083]/20 cursor-pointer" data-aos="fade-zoom-in" data-aos-easing="ease-in-back" data-aos-delay="300" data-aos-offset="0">
+                        <!-- Icon Shield -->
+                        <div class="w-12 h-12 bg-[#EBF5FF] rounded-full flex items-center justify-center text-[#1D5083]">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.016 11.955 11.955 0 00-1.042 5.5c0 4.992 3.584 9.149 8 10.065 4.416-.916 8-5.073 8-10.065 0-1.92-.453-3.734-1.258-5.341z"></path></svg>
+                        </div>
+                        <div>
+                            <h3 class="font-serif text-2xl text-[#1A1A1A] mb-3">Attorney Accreditation</h3>
+                            <p class="text-[#6B7280] text-[15px] leading-relaxed font-light">
+                                Automated vetting and compliance tracking. Maintain real-time logs of CLE credits and bar admissions.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Card 2: Performance Reporting -->
+                    <div class="bg-[#F9FAFB] rounded-2xl p-10 flex flex-col items-start gap-6 border border-[#E5E7EB]/40 transition-all duration-500 hover:shadow-2xl hover:shadow-[#1D5083]/5 hover:-translate-y-2 hover:bg-white hover:border-[#1D5083]/20 cursor-pointer" data-aos="fade-zoom-in" data-aos-easing="ease-in-back" data-aos-delay="500" data-aos-offset="0">
+                        <!-- Icon Chart -->
+                        <div class="w-12 h-12 bg-[#EBF5FF] rounded-full flex items-center justify-center text-[#1D5083]">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a4 4 0 01-4 4H8a4 4 0 01-4-4V4z"></path></svg>
+                        </div>
+                        <div>
+                            <h3 class="font-serif text-2xl text-[#1A1A1A] mb-3">Performance Reporting</h3>
+                            <p class="text-[#6B7280] text-[15px] leading-relaxed font-light">
+                                Granular firm oversight. Generate bespoke reports on partner profitability and associate utilization with a click.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Card 3: Institutional Knowledge -->
+                    <div class="bg-[#F9FAFB] rounded-2xl p-10 flex flex-col items-start gap-6 border border-[#E5E7EB]/40 transition-all duration-500 hover:shadow-2xl hover:shadow-[#1D5083]/5 hover:-translate-y-2 hover:bg-white hover:border-[#1D5083]/20 cursor-pointer" data-aos="fade-zoom-in" data-aos-easing="ease-in-back" data-aos-delay="700" data-aos-offset="0">
+                        <!-- Icon Documents -->
+                        <div class="w-12 h-12 bg-[#EBF5FF] rounded-full flex items-center justify-center text-[#1D5083]">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2"></path></svg>
+                        </div>
+                        <div>
+                            <h3 class="font-serif text-2xl text-[#1A1A1A] mb-3">Institutional Knowledge</h3>
+                            <p class="text-[#6B7280] text-[15px] leading-relaxed font-light">
+                                Centralize intellectual capital. Secure article uploads and AI-powered semantic search across your repository.
+                            </p>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- LandingPage6: Global Compliance -->
+        <section class="landingpage6 relative py-28 lg:py-36 min-h-screen overflow-hidden border-t border-[#E5E7EB]/50" style="background-image: url('{{ asset('images/office_bg.png') }}'); background-size: cover; background-position: center;">
+            
+            <!-- Dark Blue Overlay -->
+            <div class="absolute inset-0 z-[1] bg-[#102A43]/85"></div>
+            
+            <div class="max-w-7xl mx-auto px-6 flex flex-col items-center justify-center min-h-[calc(100vh-200px)] relative z-[2]">
+                
+                <!-- Glassmorphism Card -->
+                <div class="w-full max-w-5xl bg-white/10 backdrop-blur-md rounded-[2.5rem] border border-white/20 p-12 lg:p-16 flex flex-col items-center text-center gap-10 text-white transition-all duration-500 hover:bg-white/15 hover:border-white/30">
+                    
+                    <!-- Icon Globe -->
+                    <div class="w-14 h-14 bg-white/10 rounded-full flex items-center justify-center border border-white/20">
+                        <img src="{{ asset('images/landingpage6_icon.png') }}" class="w-7 h-7 object-contain" />
+                    </div>
+                    
+                    <!-- Heading -->
+                    <div class="max-w-3xl">
+                        <h2 class="font-serif text-4xl md:text-5xl lg:text-[3.5rem] leading-[1.1] mb-6 font-normal">Centralized Command for Global Compliance</h2>
+                        <p class="text-white/80 text-lg lg:text-[19px] leading-relaxed font-light">
+                            Unify disparate international offices under a single regulatory framework with Lawsy's instantaneous oversight.
+                        </p>
+                    </div>
+                    
+                    <!-- Metrics Grid -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 w-full mt-4">
+                        
+                        <!-- Box 1 -->
+                        <div class="bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-6 flex flex-col items-center justify-center transition-all duration-300 hover:bg-white/10 hover:-translate-y-1 hover:border-white/30 cursor-pointer">
+                            <span class="text-3xl font-bold mb-1">99.9%</span>
+                            <span class="text-[10px] uppercase tracking-wider font-medium text-white/60">UPTIME</span>
+                        </div>
+                        
+                        <!-- Box 2 -->
+                        <div class="bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-6 flex flex-col items-center justify-center transition-all duration-300 hover:bg-white/10 hover:-translate-y-1 hover:border-white/30 cursor-pointer">
+                            <span class="text-3xl font-bold mb-1">SOC 2</span>
+                            <span class="text-[10px] uppercase tracking-wider font-medium text-white/60">CERTIFIED</span>
+                        </div>
+                        
+                        <!-- Box 3 -->
+                        <div class="bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-6 flex flex-col items-center justify-center transition-all duration-300 hover:bg-white/10 hover:-translate-y-1 hover:border-white/30 cursor-pointer">
+                            <span class="text-3xl font-bold mb-1">256-bit</span>
+                            <span class="text-[10px] uppercase tracking-wider font-medium text-white/60">ENCRYPTION</span>
+                        </div>
+                        
+                    </div>
+                    
+                </div>
+                
+            </div>
+        </section>
+        <!-- LandingPage7: CTA & Footer -->
+        <section class="landingpage7 bg-white border-t border-[#E5E7EB]/50">
+            <!-- CTA Section -->
+            <div class="py-24 flex flex-col items-center justify-center text-center gap-8">
+                <h2 class="font-serif text-4xl md:text-5xl text-[#1A1A1A] font-normal">Ready to elevate your practice?</h2>
+                <a href="{{ route('signin') }}" class="bg-[#1D5083] text-white px-8 py-4 rounded-full text-base font-bold shadow-lg shadow-[#1D5083]/20 hover:bg-[#153c63] transition-all duration-300 transform hover:-translate-y-0.5">
+                    Access Firm Portal
+                </a>
+            </div>
+
+            <!-- Footer Section -->
+            <div class="bg-[#F8FAFC] py-16 border-t border-[#E5E7EB]/30">
+                <div class="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-12 gap-12" data-aos="fade-up" data-aos-duration="1200">
+                    
+                    <!-- Left Column: Logo and Desc -->
+                    <div class="md:col-span-5 flex flex-col items-start gap-5">
+                        <div class="flex items-center gap-2">
+                            <!-- Court/Scale Icon -->
+                            <svg class="w-6 h-6 text-[#1D5083]" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M10.394 2.08a1 1 0 00-.788 0l-7 3a1 1 0 000 1.84L5.25 8.051a.999.999 0 01.356-.257l4-1.714a1 1 0 01.788 0l4 1.714c.142.06.27.147.356.257l2.644-1.132a1 1 0 000-1.84l-7-3zM7 9.822V13.5a1 1 0 00.28.707l2 2a1 1 0 001.44 0l2-2A1 1 0 0013 13.5V9.822l-2.606 1.117a1 1 0 01-.788 0L7 9.822z"></path>
+                            </svg>
+                            <span class="font-serif text-2xl font-bold text-[#1A1A1A]">Lawsy</span>
+                        </div>
+                        <p class="text-[#6B7280] text-sm leading-relaxed max-w-sm font-light">
+                            Digital Jurisprudence for the modern era. Elevating legal administration through secure, intelligent, and scalable infrastructure.
+                        </p>
+                    </div>
+
+                    <!-- Middle Column: Platform -->
+                    <div class="md:col-span-3 flex flex-col gap-5">
+                        <span class="text-[#8B95A5] font-bold text-[11px] tracking-wider uppercase">PLATFORM</span>
+                        <div class="flex flex-col gap-3">
+                            <a href="#" class="text-[#1A1A1A] text-sm hover:text-[#1D5083] transition-colors font-light">Command Center</a>
+                            <a href="#" class="text-[#1A1A1A] text-sm hover:text-[#1D5083] transition-colors font-light">AI Analytics</a>
+                            <a href="#" class="text-[#1A1A1A] text-sm hover:text-[#1D5083] transition-colors font-light">Global Compliance</a>
+                        </div>
+                    </div>
+
+                    <!-- Right Column: Firm -->
+                    <div class="md:col-span-4 flex flex-col gap-5">
+                        <span class="text-[#8B95A5] font-bold text-[11px] tracking-wider uppercase">FIRM</span>
+                        <div class="flex flex-col gap-3">
+                            <a href="#" class="text-[#1A1A1A] text-sm hover:text-[#1D5083] transition-colors font-light">About Us</a>
+                            <a href="#" class="text-[#1A1A1A] text-sm hover:text-[#1D5083] transition-colors font-light">Privacy Policy</a>
+                            <a href="#" class="text-[#1A1A1A] text-sm hover:text-[#1D5083] transition-colors font-light">Terms of Service</a>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Bottom Bar -->
+                <div class="max-w-7xl mx-auto px-6 mt-16 pt-8 border-t border-[#E5E7EB]/30 flex flex-col md:flex-row justify-between items-center gap-4 text-[#6B7280] text-xs font-light">
+                    <span>© 2024 Lawsy Technologies, Inc. All rights reserved.</span>
+                </div>
+            </div>
+        </section>
+
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script>
+      AOS.init({
+        mirror: true, // Animasi aktif saat scroll ke bawah maupun ke atas
+        duration: 800 // Durasi default agar smooth
+      });
+    </script>
+</body>
+</html>
