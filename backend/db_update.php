@@ -33,6 +33,14 @@ try {
         }
     }
 
+    // Add column is_video to calls table for identifying call types
+    try {
+        $conn->exec("ALTER TABLE calls ADD COLUMN is_video TINYINT DEFAULT 0");
+        echo "Added column is_video to calls table\n";
+    } catch (PDOException $e) {
+        echo "Column is_video already exists in calls table or error: " . $e->getMessage() . "\n";
+    }
+
     echo "Database updated successfully.\n";
 } catch (PDOException $e) {
     echo "Error: " . $e->getMessage() . "\n";

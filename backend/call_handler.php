@@ -22,6 +22,7 @@ switch ($action) {
         $caller_id = isset($input['caller_id']) ? intval($input['caller_id']) : 0;
         $receiver_id = isset($input['receiver_id']) ? intval($input['receiver_id']) : 0;
         $sdp_offer = isset($input['sdp_offer']) ? $input['sdp_offer'] : null;
+        $is_video = isset($input['is_video']) ? intval($input['is_video']) : 0;
 
         if (!$booking_id || !$caller_id || !$receiver_id) {
             echo json_encode(["status" => "error", "message" => "Missing required fields."]);
@@ -34,8 +35,8 @@ switch ($action) {
             $stmt->execute([$booking_id]);
 
             // Insert new call
-            $stmt = $conn->prepare("INSERT INTO calls (booking_id, caller_id, receiver_id, status, sdp_offer, caller_candidates, receiver_candidates) VALUES (?, ?, ?, 'ringing', ?, '[]', '[]')");
-            $stmt->execute([$booking_id, $caller_id, $receiver_id, $sdp_offer]);
+            $stmt = $conn->prepare("INSERT INTO calls (booking_id, caller_id, receiver_id, status, sdp_offer, is_video, caller_candidates, receiver_candidates) VALUES (?, ?, ?, 'ringing', ?, ?, '[]', '[]')");
+            $stmt->execute([$booking_id, $caller_id, $receiver_id, $sdp_offer, $is_video]);
             $call_id = $conn->lastInsertId();
 
             // Fetch and return the inserted call

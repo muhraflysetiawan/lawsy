@@ -116,7 +116,8 @@ export const ChatRoomScreen = ({ navigation, route }) => {
         body: JSON.stringify({
           booking_id: bookingId,
           caller_id: user.id,
-          receiver_id: otherUser.id
+          receiver_id: otherUser.id,
+          is_video: 0
         })
       });
       const result = await res.json();
@@ -166,7 +167,8 @@ export const ChatRoomScreen = ({ navigation, route }) => {
         body: JSON.stringify({
           booking_id: bookingId,
           caller_id: user.id,
-          receiver_id: otherUser.id
+          receiver_id: otherUser.id,
+          is_video: 1
         })
       });
       const result = await res.json();
@@ -216,7 +218,8 @@ export const ChatRoomScreen = ({ navigation, route }) => {
       bookingId: bookingId,
       user: user,
       otherUser: otherUser,
-      callId: callData.id
+      callId: callData.id,
+      initialVideoMode: callData.is_video === 1 || callData.is_video === '1' || callData.is_video === true
     });
   };
 
@@ -979,7 +982,11 @@ export const ChatRoomScreen = ({ navigation, route }) => {
     >
       <View style={styles.callModalOverlay}>
         <View style={styles.callModalContent}>
-          <Text style={styles.incomingCallLabel}>INCOMING VOICE CALL</Text>
+          <Text style={styles.incomingCallLabel}>
+            {incomingCall?.is_video === 1 || incomingCall?.is_video === '1' || incomingCall?.is_video === true 
+              ? 'INCOMING VIDEO CALL' 
+              : 'INCOMING VOICE CALL'}
+          </Text>
           
           <Image
             source={{ uri: otherUser.photo || `https://i.pravatar.cc/150?u=${otherUser.id}` }}
